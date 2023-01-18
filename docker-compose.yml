@@ -1,0 +1,84 @@
+services:
+  db:
+    build:
+      context: postgres-db
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_USER=jorge
+      - POSTGRES_DB=users
+      - POSTGRES_PASSWORD=123456
+#    healthcheck:
+##      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
+#      test: ["CMD-SHELL", "psql -U jorge -d users -c 'SELECT 1'"]
+#      interval: 1s
+#      timeout: 5s
+#      retries: 5
+    volumes:
+      - postgres-db3:/var/lib/postgresql/data
+  users-api:
+    restart: on-failure
+#    depends_on:
+#      db:
+#        condition: service_healthy
+    depends_on:
+      - db
+    build:
+      context: users-api
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_USER=jorge
+      - POSTGRES_DB=users
+      - POSTGRES_PASSWORD=123456
+      - PORT=3050
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - AUTH_API_HOST=auth-api
+      - AUTH_API_PORT=3051
+    ports:
+      - "3050:3050"
+  tasks-api:
+    restart: on-failure
+#    depends_on:
+#      db:
+#        condition: service_healthy
+    depends_on:
+      - db
+    build:
+      context: tasks-api
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_USER=jorge
+      - POSTGRES_DB=tasks
+      - POSTGRES_PASSWORD=123456
+      - PORT=3052
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - AUTH_API_HOST=auth-api
+      - AUTH_API_PORT=3051
+    ports:
+      - "3052:3052"
+  auth-api:
+    restart: on-failure
+    build:
+      context: auth-api
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+#    depends_on:
+#      db:
+#        condition: service_healthy
+    environment:
+      - POSTGRES_USER=jorge
+      - POSTGRES_DB=auth
+      - POSTGRES_PASSWORD=123456
+      - PORT=3051
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - PASSWORD_PEPPER=XeDRMzq9HpuWL2ZYBw2BDi1sxjT5dnOSdOFEU00wvpo=
+      - JWT_SECRET=Q5nT18OkUuHam/Y5BRbzY3SYlwNqpJRdvYVwS/gzecc=
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+volumes:
+  postgres-db3:
