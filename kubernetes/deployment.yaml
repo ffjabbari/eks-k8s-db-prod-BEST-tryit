@@ -1,22 +1,109 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: users-deployment
+  name: deployment-containers
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: users
+      app: multinetwork
   template:
     metadata:
       labels:
-        app: users
+        app: multinetwork
     spec:
       containers:
-        - name: users
-          image: jym272/multinetwork-users-api:latest
-
-        - name: auth
+        - name: db
+          image: postgres
+          imagePullPolicy: Always
+          env:
+            - name: POSTGRES_USER
+              value: jorge
+            - name: POSTGRES_DB
+              value: users
+            - name: POSTGRES_PASSWORD
+              value: "123456"
+          command: ["/bin/sh"]
+          args:
+            [
+              "-c",
+              "echo 'CREATE DATABASE auth;CREATE DATABASE tasks;' > /docker-entrypoint-initdb.d/init.sql;exec docker-entrypoint.sh postgres",
+            ]
+        - name: auth-api
           image: jym272/multinetwork-auth-api:latest
-        - name: tasks
+          imagePullPolicy: Always
+          env:
+            - name: POSTGRES_USER
+              value: jorge
+            - name: POSTGRES_DB
+              value: auth
+            - name: POSTGRES_PASSWORD
+              value: "123456"
+            - name: PORT
+              value: "3051"
+            - name: POSTGRES_HOST
+              value: localhost
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: PASSWORD_PEPPER
+              value: XeDRMzq9HpuWL2ZYBw2BDi1sxjT5dnOSdOFEU00wvpo=
+            - name: JWT_SECRET
+              value: Q5nT18OkUuHam/Y5BRbzY3SYlwNqpJRdvYVwS/gzecc=
+        - name: users-api
+          image: jym272/multinetwork-users-api:latest
+          imagePullPolicy: Always
+          env:
+            - name: POSTGRES_USER
+              value: jorge
+            - name: POSTGRES_DB
+              value: users
+            - name: POSTGRES_PASSWORD
+              value: "123456"
+            - name: PORT
+              value: "3050"
+            - name: POSTGRES_HOST
+              value: localhost
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: AUTH_API_HOST
+              value: localhost
+            - name: AUTH_API_PORT
+              value: "3051"
+        - name: tasks-api
           image: jym272/multinetwork-tasks-api:latest
+          imagePullPolicy: Always
+          env:
+            - name: POSTGRES_USER
+              value: jorge
+            - name: POSTGRES_DB
+              value: tasks
+            - name: POSTGRES_PASSWORD
+              value: "123456"
+            - name: PORT
+              value: "3052"
+            - name: POSTGRES_HOST
+              value: localhost
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: AUTH_API_HOST
+              value: localhost
+            - name: AUTH_API_PORT
+              value: "3051"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: load-balancer-multinetwork
+spec:
+  selector:
+    app: multinetwork
+  ports:
+    - protocol: TCP
+      port: 3050
+      name: users-api
+      targetPort: 3050
+    - protocol: TCP
+      port: 3052
+      name: tasks-api
+      targetPort: 3052
+  type: LoadBalancer
