@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users
+  template:
+    metadata:
+      labels:
+        app: users
+    spec:
+      containers:
+        - name: users
+          image: jym272/multinetwork-users-api:latest
+
+        - name: auth
+          image: jym272/multinetwork-auth-api:latest
+        - name: tasks
+          image: jym272/multinetwork-tasks-api:latest

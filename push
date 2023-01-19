@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+declare -a services=("auth-api" "tasks-api" "users-api")
+declare docker_hub_repo_prefix_name="jym272/multinetwork"
+folder=$(basename "$PWD")
+no_cache=0
+tag_name="latest"
+
+function print_usage() {
+  echo "Usage: $0 [--no-cache] [--tag <tag_name>]"
+  echo "  --no-cache: build the image without using the cache"
+  echo "  --tag: tag the image with the given tag name"
+}
+
+
+
+TEMP=$(getopt -o "" --longoptions no-cache,tag: -n "$0" -- "$@")
+
+# Parse the options
+eval set -- "$TEMP"
+while true; do
+  case "$1" in
+    --no-cache ) # no-cache option
+      no_cache=1
+      shift
+      ;;
+    --tag ) # tag option
+      tag_name="$2"
+      shift 2
+      ;;
+    -- )
+      print_usage
+      # if the number of arguments is not 1, then exit with error
+      if [ $# -ne 1 ]; then
+        # print in red the remain args and exit, omit the first one : --
+        echo -e "\e[31m$0: Invalid arguments: ${*:2}\e[0m"
+        exit 1
+      fi
+      shift
+      break
+      ;;
+    * )
+      echo "Internal error!" 1>&2
+      exit 1
+      ;;
+  esac
+done
+
+
+
+function push_service() {
+  local service=$1
+  local docker_hub_repo_prefix_name=$2
+  local docker_hub_repo_name="${docker_hub_repo_prefix_name}-${service}"
+  local repository="$folder-$service:latest"
+  if [[ $no_cache -eq 1 ]]; then
+    echo -e "\e[1;32mBuilding $service without cache\e[0m"
+    docker compose build --pull --no-cache "$service"
+  else
+    echo -e "\e[1;32mBuilding $service with cache\e[0m"
+    docker compose build --pull "$service"
+  fi
+  docker tag "$repository" "$docker_hub_repo_name:$tag_name"
+  docker push "$docker_hub_repo_name:$tag_name"
+}
+
+for service in "${services[@]}"; do
+  push_service "$service" "$docker_hub_repo_prefix_name"
+done
+
+
