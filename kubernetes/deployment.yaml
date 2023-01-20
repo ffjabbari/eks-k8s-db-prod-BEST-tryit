@@ -29,6 +29,34 @@ spec:
               "-c",
               "echo 'CREATE DATABASE auth;CREATE DATABASE tasks;' > /docker-entrypoint-initdb.d/init.sql;exec docker-entrypoint.sh postgres",
             ]
+          livenessProbe:
+            exec:
+              command:
+                [
+                  "psql",
+                  "-U",
+                  "jorge",
+                  "-d",
+                  "users",
+                  "-c",
+                  "SELECT 1",
+                ]
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                [
+                  "psql",
+                  "-U",
+                  "jorge",
+                  "-d",
+                  "users",
+                  "-c",
+                  "SELECT 1",
+                ]
+            initialDelaySeconds: 3
+            periodSeconds: 10
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -44,6 +72,11 @@ spec:
       labels:
         app: multinetwork
     spec:
+      initContainers:
+        - name: init-postgres
+          imagePullPolicy: IfNotPresent
+          image: busybox:1.36.0
+          command: [ 'sh', '-c', "until nc -vz db.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local 5432; do echo waiting for db; sleep 2; done" ]
       containers:
         - name: auth-api
           image: jym272/multinetwork-auth-api:v0.1dev

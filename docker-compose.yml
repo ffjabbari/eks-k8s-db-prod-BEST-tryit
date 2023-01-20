@@ -9,6 +9,8 @@ services:
       - POSTGRES_PASSWORD=123456
     volumes:
       - postgres-multinetwork:/var/lib/postgresql/data
+    ports:
+      - "5555:5432"
   users-api:
     restart: on-failure
     depends_on:
