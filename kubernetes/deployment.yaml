@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
         - name: db
-          image: postgres
-          imagePullPolicy: Always
+          image: postgres:15.1
+          imagePullPolicy: IfNotPresent
           env:
             - name: POSTGRES_USER
               value: jorge
@@ -100,7 +100,7 @@ spec:
             - name: POSTGRES_HOST
               value: $(DB_SERVICE_HOST)
             - name: POSTGRES_PORT
-              value: "5432"
+              value: $(DB_SERVICE_PORT_POSTGRES_PORT)
             - name: AUTH_API_HOST
               value: localhost
             - name: AUTH_API_PORT
@@ -134,6 +134,6 @@ spec:
   ports:
     - protocol: TCP
       port: 5432
-      name: db
+      name: postgres-port
       targetPort: 5432
   type: ClusterIP
