@@ -1,3 +1,4 @@
 You should avoid using the :latest tag when deploying containers in production as it is harder to track which version of the image is running and more difficult to roll back properly.
 https://kubernetes.io/docs/concepts/containers/images/ mejor usar versiones en la imagen cuando este en prod: Ej users-api:1.0.0
 
+adminer in kubernetes

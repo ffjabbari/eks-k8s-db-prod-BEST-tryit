@@ -1,3 +1,104 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-api
+spec:
+  selector:
+    api: users-api
+    api-type: external
+  ports:
+    - protocol: TCP
+      port: 3050
+      name: users-api
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tasks-api
+spec:
+  selector:
+    api: tasks-api
+    api-type: external
+  ports:
+    - protocol: TCP
+      port: 3052
+      name: tasks-api
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+spec:
+  selector:
+    db: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      name: postgres
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-api
+spec:
+  selector:
+    api: auth
+  ports:
+    - protocol: TCP
+      port: 3051
+      name: auth-api
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      api: auth
+  template:
+    metadata:
+      labels:
+        api: auth
+        api-type: internal
+    spec:
+      initContainers:
+        - name: init-postgres
+          imagePullPolicy: IfNotPresent
+          image: busybox:1.36.0
+          command:
+            [
+              "sh",
+              "-c",
+              "until nc -vz db.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local 5432; do echo waiting for db; sleep 2; done",
+            ]
+      containers:
+        - name: auth-api
+          image: jym272/multinetwork-auth-api:v0.1dev
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_USER
+              value: jorge
+            - name: POSTGRES_DB
+              value: auth
+            - name: POSTGRES_PASSWORD
+              value: "123456"
+            - name: PORT
+              value: $(AUTH_API_SERVICE_PORT_AUTH_API)
+            - name: POSTGRES_HOST
+              value: db.default
+            - name: POSTGRES_PORT
+              value: $(DB_SERVICE_PORT_POSTGRES)
+            - name: PASSWORD_PEPPER
+              value: XeDRMzq9HpuWL2ZYBw2BDi1sxjT5dnOSdOFEU00wvpo=
+            - name: JWT_SECRET
+              value: Q5nT18OkUuHam/Y5BRbzY3SYlwNqpJRdvYVwS/gzecc=
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -31,73 +132,41 @@ spec:
             ]
           livenessProbe:
             exec:
-              command:
-                [
-                  "psql",
-                  "-U",
-                  "jorge",
-                  "-d",
-                  "users",
-                  "-c",
-                  "SELECT 1",
-                ]
+              command: ["psql", "-U", "jorge", "-d", "users", "-c", "SELECT 1"]
             initialDelaySeconds: 3
             periodSeconds: 10
           readinessProbe:
             exec:
-              command:
-                [
-                  "psql",
-                  "-U",
-                  "jorge",
-                  "-d",
-                  "users",
-                  "-c",
-                  "SELECT 1",
-                ]
+              command: ["psql", "-U", "jorge", "-d", "users", "-c", "SELECT 1"]
             initialDelaySeconds: 3
             periodSeconds: 10
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deployment-containers
+  name: users-api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: multinetwork
+      api: users-api
   template:
     metadata:
       labels:
-        app: multinetwork
+        api: users-api
+        api-type: external
     spec:
       initContainers:
         - name: init-postgres
           imagePullPolicy: IfNotPresent
           image: busybox:1.36.0
-          command: [ 'sh', '-c', "until nc -vz db.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local 5432; do echo waiting for db; sleep 2; done" ]
+          command:
+            [
+              "sh",
+              "-c",
+              "until nc -vz db.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local 5432; do echo waiting for db; sleep 2; done",
+            ]
       containers:
-        - name: auth-api
-          image: jym272/multinetwork-auth-api:v0.1dev
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: POSTGRES_USER
-              value: jorge
-            - name: POSTGRES_DB
-              value: auth
-            - name: POSTGRES_PASSWORD
-              value: "123456"
-            - name: PORT
-              value: "3051"
-            - name: POSTGRES_HOST
-              value: db.default
-            - name: POSTGRES_PORT
-              value: "5432"
-            - name: PASSWORD_PEPPER
-              value: XeDRMzq9HpuWL2ZYBw2BDi1sxjT5dnOSdOFEU00wvpo=
-            - name: JWT_SECRET
-              value: Q5nT18OkUuHam/Y5BRbzY3SYlwNqpJRdvYVwS/gzecc=
         - name: users-api
           image: jym272/multinetwork-users-api:v0.1dev
           imagePullPolicy: IfNotPresent
@@ -109,15 +178,42 @@ spec:
             - name: POSTGRES_PASSWORD
               value: "123456"
             - name: PORT
-              value: "3050"
+              value: $(USERS_API_SERVICE_PORT_USERS_API)
             - name: POSTGRES_HOST
               value: db.default.svc.cluster.local
             - name: POSTGRES_PORT
-              value: "5432"
+              value: $(DB_SERVICE_PORT_POSTGRES)
             - name: AUTH_API_HOST
-              value: localhost
+              value: auth-api.default.svc.cluster.local
             - name: AUTH_API_PORT
-              value: "3051"
+              value: $(AUTH_API_SERVICE_PORT_AUTH_API)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tasks-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      api: tasks-api
+  template:
+    metadata:
+      labels:
+        api: tasks-api
+        api-type: external
+    spec:
+      initContainers:
+        - name: init-postgres
+          imagePullPolicy: IfNotPresent
+          image: busybox:1.36.0
+          command:
+            [
+              "sh",
+              "-c",
+              "until nc -vz db.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local 5432; do echo waiting for db; sleep 2; done",
+            ]
+      containers:
         - name: tasks-api
           image: jym272/multinetwork-tasks-api:v0.1dev
           imagePullPolicy: IfNotPresent
@@ -129,44 +225,12 @@ spec:
             - name: POSTGRES_PASSWORD
               value: "123456"
             - name: PORT
-              value: "3052"
+              value: $(TASKS_API_SERVICE_PORT_TASKS_API)
             - name: POSTGRES_HOST
               value: $(DB_SERVICE_HOST)
             - name: POSTGRES_PORT
-              value: $(DB_SERVICE_PORT_POSTGRES_PORT)
+              value: $(DB_SERVICE_PORT_POSTGRES)
             - name: AUTH_API_HOST
-              value: localhost
+              value: $(AUTH_API_SERVICE_HOST)
             - name: AUTH_API_PORT
-              value: "3051"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: load-balancer-multinetwork
-spec:
-  selector:
-    app: multinetwork
-  ports:
-    - protocol: TCP
-      port: 3050
-      name: users-api
-      targetPort: 3050
-    - protocol: TCP
-      port: 3052
-      name: tasks-api
-      targetPort: 3052
-  type: LoadBalancer
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: db
-spec:
-  selector:
-    db: postgres
-  ports:
-    - protocol: TCP
-      port: 5432
-      name: postgres-port
-      targetPort: 5432
-  type: ClusterIP
+              value: $(AUTH_API_SERVICE_PORT_AUTH_API)
