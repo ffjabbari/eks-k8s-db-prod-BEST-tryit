@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      db: postgres
+  template:
+    metadata:
+      labels:
+        db: postgres
+    spec:
+      containers:
+        - name: db
+          image: postgres:15.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_USER
+              value: jorge
+            - name: POSTGRES_DB
+              value: users
+            - name: POSTGRES_PASSWORD
+              value: "123456"
+          command: ["/bin/sh"]
+          args:
+            [
+              "-c",
+              "echo 'CREATE DATABASE auth;CREATE DATABASE tasks;' > /docker-entrypoint-initdb.d/init.sql;exec docker-entrypoint.sh postgres",
+            ]
+          livenessProbe:
+            exec:
+              command: ["psql", "-U", "jorge", "-d", "users", "-c", "SELECT 1"]
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: ["psql", "-U", "jorge", "-d", "users", "-c", "SELECT 1"]
+            initialDelaySeconds: 3
+            periodSeconds: 10

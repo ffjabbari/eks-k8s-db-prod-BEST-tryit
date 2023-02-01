@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      api: auth
+  template:
+    metadata:
+      labels:
+        api: auth
+        api-type: internal
+    spec:
+      initContainers:
+        - name: init-postgres
+          imagePullPolicy: IfNotPresent
+          image: busybox:1.36.0
+          command:
+            [
+              "sh",
+              "-c",
+              "until nc -vz db.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local 5432; do echo waiting for db; sleep 2; done",
+            ]
+      containers:
+        - name: auth-api
+          image: jym272/multinetwork-auth-api:v0.1dev
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_USER
+              value: jorge
+            - name: POSTGRES_DB
+              value: auth
+            - name: POSTGRES_PASSWORD
+              value: "123456"
+            - name: PORT
+              value: $(AUTH_API_SERVICE_PORT_AUTH_API)
+            - name: POSTGRES_HOST
+              value: db.default
+            - name: POSTGRES_PORT
+              value: $(DB_SERVICE_PORT_POSTGRES)
+            - name: PASSWORD_PEPPER
+              value: XeDRMzq9HpuWL2ZYBw2BDi1sxjT5dnOSdOFEU00wvpo=
+            - name: JWT_SECRET
+              value: Q5nT18OkUuHam/Y5BRbzY3SYlwNqpJRdvYVwS/gzecc=

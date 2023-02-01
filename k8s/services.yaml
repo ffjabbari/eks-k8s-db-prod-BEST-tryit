@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-api
+spec:
+  selector:
+    api: users-api
+    api-type: external
+  ports:
+    - protocol: TCP
+      port: 3050
+      name: users-api
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tasks-api
+spec:
+  selector:
+    api: tasks-api
+    api-type: external
+  ports:
+    - protocol: TCP
+      port: 3052
+      name: tasks-api
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+spec:
+  selector:
+    db: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      name: postgres
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-api
+spec:
+  selector:
+    api: auth
+    api-type: internal
+  ports:
+    - protocol: TCP
+      port: 3051
+      name: auth-api
+  type: ClusterIP

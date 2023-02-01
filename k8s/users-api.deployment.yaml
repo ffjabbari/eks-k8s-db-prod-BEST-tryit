@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      api: users-api
+  template:
+    metadata:
+      labels:
+        api: users-api
+        api-type: external
+    spec:
+      initContainers:
+        - name: init-postgres
+          imagePullPolicy: IfNotPresent
+          image: busybox:1.36.0
+          command:
+            [
+              "sh",
+              "-c",
+              "until nc -vz db.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local 5432; do echo waiting for db; sleep 2; done",
+            ]
+      containers:
+        - name: users-api
+          image: jym272/multinetwork-users-api:v0.1dev
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_USER
+              value: jorge
+            - name: POSTGRES_DB
+              value: users
+            - name: POSTGRES_PASSWORD
+              value: "123456"
+            - name: PORT
+              value: $(USERS_API_SERVICE_PORT_USERS_API)
+            - name: POSTGRES_HOST
+              value: db.default.svc.cluster.local
+            - name: POSTGRES_PORT
+              value: $(DB_SERVICE_PORT_POSTGRES)
+            - name: AUTH_API_HOST
+              value: auth-api.default.svc.cluster.local
+            - name: AUTH_API_PORT
+              value: $(AUTH_API_SERVICE_PORT_AUTH_API)
