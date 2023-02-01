@@ -28,3 +28,7 @@ spec:
         - name: adminer
           image: adminer:4
           imagePullPolicy: IfNotPresent
+          env:
+            - name: ADMINER_DESIGN
+              value: dracula
+
