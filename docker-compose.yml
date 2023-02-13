@@ -1,5 +1,6 @@
 services:
   db:
+    restart: unless-stopped
     build:
       context: postgres-db
       dockerfile: Dockerfile
@@ -25,8 +26,6 @@ services:
       - POSTGRES_PORT=5432
       - AUTH_API_HOST=auth-api
       - AUTH_API_PORT=3051
-    ports:
-      - "3050:3050"
   tasks-api:
     restart: on-failure
     depends_on:
@@ -43,8 +42,6 @@ services:
       - POSTGRES_PORT=5432
       - AUTH_API_HOST=auth-api
       - AUTH_API_PORT=3051
-    ports:
-      - "3052:3052"
   auth-api:
     restart: on-failure
     build:
@@ -61,6 +58,22 @@ services:
       - POSTGRES_PORT=5432
       - PASSWORD_PEPPER=XeDRMzq9HpuWL2ZYBw2BDi1sxjT5dnOSdOFEU00wvpo=
       - JWT_SECRET=Q5nT18OkUuHam/Y5BRbzY3SYlwNqpJRdvYVwS/gzecc=
+  frontend:
+    restart: unless-stopped
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - USERS_API_HOST=users-api
+      - USERS_API_PORT=3050
+      - TASKS_API_HOST=tasks-api
+      - TASKS_API_PORT=3052
+    depends_on:
+      - users-api
+      - tasks-api
+      - auth-api
   adminer:
     image: adminer
     ports:
