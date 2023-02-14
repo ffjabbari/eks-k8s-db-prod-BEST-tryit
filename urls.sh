@@ -4,7 +4,7 @@ set -eou pipefail
 
 declare minikube_ip
 declare -A ports
-declare -a service_names=(tasks-api users-api adminer)
+declare -a service_names=(frontend  adminer)
 
 minikube_ip=$(minikube ip)
 

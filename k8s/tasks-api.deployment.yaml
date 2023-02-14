@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: tasks-api
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       api: tasks-api
@@ -25,7 +25,7 @@ spec:
             ]
       containers:
         - name: tasks-api
-          image: jym272/multinetwork-tasks-api:v0.1dev
+          image: jym272/multinetwork-tasks-api:v1
           imagePullPolicy: IfNotPresent
           env:
             - name: POSTGRES_USER

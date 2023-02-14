@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: frontend
+  template:
+    metadata:
+      labels:
+        name: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: jym272/multinetwork-frontend:v1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: USERS_API_HOST
+              value: users-api.default.svc.cluster.local
+            - name: USERS_API_PORT
+              value: $(USERS_API_SERVICE_PORT_USERS_API)
+            - name: TASKS_API_HOST
+              value: tasks-api.default.svc.cluster.local
+            - name: TASKS_API_PORT
+              value: $(TASKS_API_SERVICE_PORT_TASKS_API)

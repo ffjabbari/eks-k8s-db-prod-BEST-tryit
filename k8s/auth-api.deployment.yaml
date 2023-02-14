@@ -25,7 +25,7 @@ spec:
             ]
       containers:
         - name: auth-api
-          image: jym272/multinetwork-auth-api:v0.1dev
+          image: jym272/multinetwork-auth-api:v1
           imagePullPolicy: IfNotPresent
           env:
             - name: POSTGRES_USER

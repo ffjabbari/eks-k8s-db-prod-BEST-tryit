@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-declare -a services=("auth-api" "tasks-api" "users-api")
+declare -a services=("auth-api" "tasks-api" "users-api" "frontend")
 declare docker_hub_repo_prefix_name="jym272/multinetwork"
 folder=$(basename "$PWD")
 no_cache=0
