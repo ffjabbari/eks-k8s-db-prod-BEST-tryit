@@ -1,0 +1,10 @@
+services:
+  kubectl:
+    image: alpine/k8s:1.23.16
+    volumes:
+      - kube:/root/.kube
+      - aws:/root/.aws
+volumes:
+  kube:
+  aws:
+

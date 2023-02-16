@@ -1,0 +1,17 @@
+# A simple example of ClusterConfig object:
+---
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: eks-test-1
+  region: sa-east-1
+
+nodeGroups:
+  - name: ng-1
+    instanceType: t3.small
+    desiredCapacity: 1
+
+cloudWatch:
+  clusterLogging:
+    enableTypes: ["audit", "authenticator", "controllerManager"]
