@@ -2,27 +2,14 @@
 
 set -euo pipefail
 
-
-# steps
-# 1. create a vpc, not necessary if you already have one or eksctl create cluster will create one for you
-aws cloudformation create-stack \
-  --region sa-east-1 \
-  --stack-name eks-vpc-test-1 \
-  --template-url https://s3.us-west-2.amazonaws.com/amazon-eks/cloudformation/2020-10-29/amazon-eks-vpc-private-subnets.yaml
-
-# 2. create a cluster iam role
-aws iam create-role --role-name eksClusterRole-test-1 --assume-role-policy-document file://eks-cluster-role-trust-policy.json
-# 3 attach the AmazonEKSClusterPolicy policy to the role
-aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/AmazonEKSClusterPolicy --role-name eksClusterRole-test-1
-
-# 4. eksctl create cluster using cluster.yaml file
+# create
+# https://eksctl.io/usage/creating-and-managing-clusters/
 eksctl create cluster -f cluster.yaml
 
-# Get all identity mappings:
-eksctl get iamidentitymapping --cluster eks-test-1 --region=sa-east-1
+#delete
+eksctl delete cluster -f cluster.yaml
 
-# copy folder k8s/ to container c167702754d6
-docker cp k8s/ c167702754d6:/k8s/
-
-kubectl apply -f k8s/services.yaml && kubectl apply -f k8s/
-pod=$(kubectl get pods |  awk 'NR==6{print $1}')
+#apply kubectl
+kubectl apply -f k8s/service.yaml && kubectl apply -f k8s
+# delete
+kubectl delete -f k8s

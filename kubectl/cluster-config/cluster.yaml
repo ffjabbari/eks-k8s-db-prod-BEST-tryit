@@ -4,7 +4,7 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: eks-test-1
+  name: eks-cluster-multinetwork
   region: sa-east-1
 
 nodeGroups:

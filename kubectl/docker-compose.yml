@@ -4,6 +4,8 @@ services:
     volumes:
       - kube:/root/.kube
       - aws:/root/.aws
+      - ../k8s:/root/k8s
+      - ./cluster-config:/root/cluster-config
 volumes:
   kube:
   aws:
