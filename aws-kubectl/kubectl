@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+name_of_service=kubectl
+cmd=kubectl
+docker compose run --rm "$name_of_service" "$cmd" "$@"

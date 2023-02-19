@@ -23,6 +23,8 @@ spec:
               value: users
             - name: POSTGRES_PASSWORD
               value: "123456"
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           command: ["/bin/sh"]
           args:
             [
@@ -40,9 +42,9 @@ spec:
             initialDelaySeconds: 3
             periodSeconds: 10
           volumeMounts:
-            - mountPath: /var/lib/postgresql/data
-              name: postgres-pv
+            - mountPath: var/lib/postgresql/data
+              name: persistent-storage
       volumes:
-        - name: postgres-pv
+        - name: persistent-storage
           persistentVolumeClaim:
             claimName: postgres-pvc

@@ -1,5 +1,3 @@
-# A simple example of ClusterConfig object:
----
 apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
@@ -9,8 +7,11 @@ metadata:
 
 nodeGroups:
   - name: ng-1
-    instanceType: t3.small
-    desiredCapacity: 1
+    instanceType: t3.medium
+    desiredCapacity: 2
+  - name: ng-2
+    instanceType: t3.medium
+    desiredCapacity: 2
 
 cloudWatch:
   clusterLogging:

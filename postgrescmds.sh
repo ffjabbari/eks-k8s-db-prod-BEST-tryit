@@ -10,9 +10,20 @@ export AWS_REGION=sa-east-1
 
 # list all cluster in eks output jq
 aws eks list-clusters
-# generate kubeconfig and save it to ~/.kube/config -> THIS REPLACE THE CURRENT CONFIG
-aws eks update-kubeconfig --region sa-east-1 --name test-demo
-# ! now kubectl is configured to use the cluster
 
-aws eks --region sa-east-1 update-kubeconfig --name test-demo --role-arn arn:aws:iam::712136406596:role/myAmazonEKSClusterRoleDemo
+#file_system_id=$(aws efs create-file-system \
+#    --region sa-east-1 \
+#    --performance-mode generalPurpose \
+#    --tags Key=Name,Value=efs_for_cluster_multinetwork \
+#    --query 'FileSystemId' \
+#    --output text)
+
+# list all mount point of fs-0151c9f2b7f6ae8ad in json
+aws efs describe-mount-targets --file-system-id fs-0151c9f2b7f6ae8ad
+# list all acces point of fs-0151c9f2b7f6ae8ad in json
+aws efs describe-access-points --file-system-id fs-0151c9f2b7f6ae8ad
+# who is connected to fs-0151c9f2b7f6ae8ad
+aws efs describe-mount-target-security-groups --file-system-id fs-0151c9f2b7f6ae8ad
+
+
 
