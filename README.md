@@ -59,7 +59,8 @@ declare docker_hub_repo_prefix_name="myuser/multinetwork"
 # Usage, it will build the images using docker-compose.yml and push them to 
 # docker hub
 
-# it uses the tag:latest by default
+# All services
+# it uses the tag:latest and the images is built with cache by default
 bash push.sh 
 # it uses a custom tag
 bash push.sh --tag v1.0.0
@@ -67,6 +68,14 @@ bash push.sh --tag v1.0.0
 bash push.sh --no-cache
 # it uses a custom tag and build the images without cache, force rebuild
 bash push.sh --tag v2.0.0 --no-cache
+
+# Selected services
+# only frontend and auth-api
+bash push.sh frontend auth-api
+# only tasks-api with tag
+bash push.sh --tag v1.0.0 tasks-api
+# only users-api without cache
+bash push.sh --no-cache users-api
 ```
 
 

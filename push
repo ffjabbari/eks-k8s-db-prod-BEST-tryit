@@ -2,6 +2,7 @@
 
 set -euo pipefail
 declare -a services=("auth-api" "tasks-api" "users-api" "frontend")
+declare left_args
 declare docker_hub_repo_prefix_name="jym272/multinetwork"
 folder=$(basename "$PWD")
 no_cache=0
@@ -11,6 +12,16 @@ function print_usage() {
   echo "Usage: $0 [--no-cache] [--tag <tag_name>]"
   echo "  --no-cache: build the image without using the cache"
   echo "  --tag: tag the image with the given tag name"
+}
+
+function arg_is_a_service(){
+  local arg=$1
+  for service in "${services[@]}"; do
+    if [[ $arg == "$service" ]]; then
+      return 0
+    fi
+  done
+  return 1
 }
 
 
@@ -30,14 +41,14 @@ while true; do
       shift 2
       ;;
     -- )
-      print_usage
-      # if the number of arguments is not 1, then exit with error
-      echo "args: $*"
-
       if [ $# -ne 1 ]; then
-        # print in red the remain args and exit, omit the first one : --
-        echo -e "\e[31m$0: Invalid arguments: ${*:2}\e[0m"
-        exit 1
+        left_args=${*:2}
+        for arg in $left_args; do
+          if ! arg_is_a_service "$arg"; then
+            echo -e "\e[31m$0: In the args: ${*:2}. $arg is not a service. Invalid arguments\e[0m"
+            exit 1
+          fi
+        done
       fi
       shift
       break
@@ -66,8 +77,8 @@ function push_service() {
   docker tag "$repository" "$docker_hub_repo_name:$tag_name"
   docker push "$docker_hub_repo_name:$tag_name"
 }
-
-for service in "${services[@]}"; do
+available_services=${left_args:-${services[@]}}
+for service in $available_services; do
   push_service "$service" "$docker_hub_repo_prefix_name"
 done
 
