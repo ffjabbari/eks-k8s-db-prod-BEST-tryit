@@ -26,7 +26,7 @@ spec:
       containers:
         - name: users-api
           image: jym272/multinetwork-users-api:v1
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           env:
             - name: POSTGRES_USER
               value: jorge

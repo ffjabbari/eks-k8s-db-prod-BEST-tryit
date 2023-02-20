@@ -32,6 +32,8 @@ while true; do
     -- )
       print_usage
       # if the number of arguments is not 1, then exit with error
+      echo "args: $*"
+
       if [ $# -ne 1 ]; then
         # print in red the remain args and exit, omit the first one : --
         echo -e "\e[31m$0: Invalid arguments: ${*:2}\e[0m"

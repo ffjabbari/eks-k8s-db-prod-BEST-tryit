@@ -15,7 +15,7 @@ spec:
       containers:
         - name: frontend
           image: jym272/multinetwork-frontend:v1
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           env:
             - name: USERS_API_HOST
               value: users-api.default.svc.cluster.local

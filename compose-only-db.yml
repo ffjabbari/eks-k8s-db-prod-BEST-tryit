@@ -7,6 +7,7 @@ services:
       - POSTGRES_USER=jorge
       - POSTGRES_DB=users
       - POSTGRES_PASSWORD=123456
+      - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - postgres-multinetwork-only-db:/var/lib/postgresql/data
     ports:

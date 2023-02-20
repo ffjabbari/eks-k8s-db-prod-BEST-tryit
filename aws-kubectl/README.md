@@ -1,4 +1,4 @@
-### Utility container: kubectl
+### Kubectl
 
 The [alpine/k8s](https://hub.docker.com/r/alpine/k8s) image is used for deploying kubernetes 
 resources, is based on the alpine image, 
@@ -80,6 +80,17 @@ kubectl apply -f k8s/services.yaml && kubectl apply -f k8s
     bash urls.sh
     ```
 
+
+
+### Utility container Kubectl
+Instead of accessing the container in interactive mode, the container can be used as a utility
+container, for example to get the status of the pods or services, the following commands can be:
+```bash
+# aws-kubectl/
+./kubectl get pods -o wide
+bash kubectl get svc
+```
+
 ### Deleting the cluster
 First, stop and delete all resources in the cluster
 ```bash
@@ -91,7 +102,7 @@ If an EFS volume wasn't created, the cluster can be deleted using the following 
 #inside the container in ~/files/
 eksctl delete cluster -f cluster.yaml
 ```
-Otherwise, the EFS volume must be deleted first, then the security group, then the cluster and 
+Otherwise, the EFS volume must be deleted first, then the security group, then the cluster and
 finally an IAM policy that was created for the EFS volume. All these steps can be done by executing
 the following command:
 ```bash
