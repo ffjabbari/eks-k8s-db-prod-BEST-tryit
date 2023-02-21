@@ -1,0 +1,5 @@
+resources:
+  - ../../base/
+  - aws-efs-csi-volume.yaml
+patchesStrategicMerge:
+  - postgres-db-patch.yml

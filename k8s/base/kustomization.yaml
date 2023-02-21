@@ -1,0 +1,8 @@
+resources:
+  - services.yaml
+  - postgres-db.deployment.yaml
+  - adminer.deployment.yaml
+  - auth-api.deployment.yaml
+  - frontend.deployment.yaml
+  - tasks-api.deployment.yaml
+  - users-api.deployment.yaml

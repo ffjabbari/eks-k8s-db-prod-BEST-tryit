@@ -5,7 +5,7 @@ services:
     volumes:
       - kube:/root/.kube
       - ../k8s:/root/k8s
-      - /root/k8s/pvc
+      - /root/k8s/overlay/local
       - ~/.aws:/root/.aws
       - ./files:/root/files
 volumes:

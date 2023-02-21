@@ -68,7 +68,7 @@ fi
 
 
 green_echo "Deleting the cluster"
-eksctl delete cluster -f cluster.yaml
+eksctl delete cluster -f ~/files/cluster.yaml
 
 arn_policy=$(aws iam list-policies --region $region_code --query 'Policies[?PolicyName==`'$arn_policy_name'`].Arn' --output text)
 if [ -z "$arn_policy" ]

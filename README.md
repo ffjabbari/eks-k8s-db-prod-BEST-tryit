@@ -30,9 +30,9 @@ one of the following files
 
 
 #### Deploy k8s
+The deploy is realized using [kustomize](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/).
 ```bash
-# IMPORTANT!! first services due to env vars
-kubectl apply -f k8s/services.yaml && kubectl apply -Rf k8s/
+kubectl apply -k ./k8s/overlays/local
 ```
 #### Urls
 If `minikube` is used for the local cluster, the services will be exposed in the host machine.
@@ -43,7 +43,7 @@ bash urls.sh
 
 #### Delete resources
 ```bash
-kubectl delete -Rf k8s/ 
+kubectl delete -k ./k8s/overlays/local
 ```
 ### Push script
 The `push.sh` script will build the images and push them to the docker hub in a name

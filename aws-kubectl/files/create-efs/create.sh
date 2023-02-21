@@ -97,9 +97,6 @@ nodes_internal_ips=$(kubectl get nodes -o json | jq -r '.items[] | [.status.addr
 green_echo "Creating the mount targets"
 python3 aws.py $nodes_internal_ips
 
-green_echo "Replacing the file_system_id in k8s-efs/pv.yaml"
-dir_name=$(dirname "$0")
-cd "$dir_name"
-cd ..
-dir_of_file="$(pwd)/k8s-efs/pv.yaml"
+green_echo "Replacing the file_system_id in aws-efs-csi-volume.yaml"
+dir_of_file=~/k8s/overlay/eks/aws-efs-csi-volume.yaml
 sed -i "s/volumeHandle: fs-.*/volumeHandle: $file_system_id/" "$dir_of_file"

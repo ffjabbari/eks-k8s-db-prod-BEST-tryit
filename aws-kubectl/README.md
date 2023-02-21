@@ -1,23 +1,25 @@
 ### Kubectl
 
 The [alpine/k8s](https://hub.docker.com/r/alpine/k8s) image is used for deploying kubernetes 
-resources, is based on the alpine image, 
-includes the `kubectl`, `eksctl` binary and is designed to be used as a utility container for 
-**AWS EKS**. 
+resources, it includes `kubectl`, `eksctl` binaries and is designed to be used as a utility 
+container for **AWS EKS**. 
 
 For ease of use, the container is configured to use the AWS credentials of the host machine, a 
 _named volume_ is used to store `kubectl` config once the cluster has been deployed.
 ```bash
 cd aws-kubectl/
+
 # init the container on interactive mode
 docker compose run --rm kubectl
+
 #inside the container
 cd files/
 ```
 In `docker-compose.yml` a bind mount is used to copy the kubernetes files to the container, 
-note that an anonymous volume is also used to prevent copying the dir __k8s/pvc__, this config 
-is used to persist the postgres database, but is a **hostPath** volume and is only valid for the
-host machine in a configuration with one node like **minikube**.
+`k8s` dir.
+
+Note that an anonymous volume is also used to prevent copying the dir __k8s/overlay/local__, this 
+config use a **hostPath** volume and is only valid in a one node cluster like **minikube**.
 
 The volume used in the AWS EKS cluster is an **EFS-CSI** [volume](https://docs.aws.amazon.com/eks/latest/userguide/efs-csi.html).
 
@@ -35,40 +37,40 @@ and change the part `602401143452.dkr.ecr.sa-east-1.amazonaws.com`
 Once the container is running in interactive mode, the cluster can be deployed using the following
 command:
 ```bash
-#inside the container in ~/files/
-
 # first check aws credentials, this is important, all resources and the ownership of the cluster is
 # determined by these credentials.
 aws sts get-caller-identity
+
+#inside the container in ~/files/
 # create the cluster (it takes about 15-20 minutes)
 eksctl create cluster -f cluster.yaml
 ```
-The k8s files are configured so that postgres persists its database on a volume, for this purpose
-a AWS EFS volume is used. When the cluster is deployed, all the creation and configuration of the
-EFS volume is done by executing the following command:
+#### EFS CSI volume
+
+The k8s files are configured in such a way that postgres persists its database on a volume, for 
+this purpose a AWS EFS volume is used. 
+
+When the cluster is deployed, all the creation and configuration of the EFS CSI volume is done by 
+executing the following command:
 ```bash
 #inside the container in ~/files/create-efs/
 bash create.sh
 ```
+
 The EFS volume is created with mount targets in the same VPC as the cluster, and the security 
 group of the EFS volume is configured to allow access from the security group of the cluster.
 
-The script also change the file system id of the EFS volume in the `k8s-efs/pv.yaml` file, this
-is necessary because the file system id is generated randomly by AWS.
+The script also change the file system id of the EFS volume in the `~/k8s/overlay/eks/aws-efs-csi-volume.yaml` 
+file, this is necessary because the file system id is generated randomly by AWS.
 ### Initializing the app
 
 The containers can be initialized by executing the following command:
 ```bash
-#inside the container in ~/files/
-
-# first pv, pvc and storage class for the efs volume
-kubectl apply -f k8s-efs/
-cd ..
-
 #inside the container in ~/
+kubectl apply -k k8s/overlay/eks
 
-# IMPORTANT!! services first due to environment variables
-kubectl apply -f k8s/services.yaml && kubectl apply -f k8s
+# see the resources created 
+kubectl get -k k8s/overlay/eks
 ```
 
 - #### Urls
@@ -76,18 +78,20 @@ kubectl apply -f k8s/services.yaml && kubectl apply -f k8s
   time, the app can be accessed using the  following script, the links may take a while due to 
   load balancers in services.
     ```bash
-    #inside the container in ~/files
-    bash urls.sh
+    #inside the container in ~/
+    bash files/urls.sh
     ```
 
 
 
 ### Utility container Kubectl
 Instead of accessing the container in interactive mode, the container can be used as a utility
-container, for example to get the status of the pods or services, the following commands can be:
+container executed in the host, for example, to get the status of the pods or services, the 
+following commands can be:
 ```bash
-# aws-kubectl/
+# In the host in aws-kubectl/
 ./kubectl get pods -o wide
+# or
 bash kubectl get svc
 ```
 
@@ -95,7 +99,7 @@ bash kubectl get svc
 First, stop and delete all resources in the cluster
 ```bash
 #inside the container in ~/
-kubectl delete -f k8s && kubectl delete -f files/k8s-efs/ 
+kubectl delete -k k8s/overlay/eks
 ```
 If an EFS volume wasn't created, the cluster can be deleted using the following command:
 ```bash

@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+spec:
+  template:
+    spec:
+      volumes:
+        - name: persistent-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc

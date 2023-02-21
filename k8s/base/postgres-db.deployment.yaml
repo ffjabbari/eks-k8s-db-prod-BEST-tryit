@@ -47,4 +47,4 @@ spec:
       volumes:
         - name: persistent-storage
           persistentVolumeClaim:
-            claimName: postgres-pvc
+            claimName: this-value-is-patched-by-kustomize
