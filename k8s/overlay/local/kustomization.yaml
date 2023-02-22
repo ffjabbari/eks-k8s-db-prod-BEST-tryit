@@ -3,3 +3,16 @@ resources:
   - host-path-pv.yaml
 patchesStrategicMerge:
   - postgres-db-patch.yml
+images:
+  - name: auth-api-image
+    newName: jym272/multinetwork-auth-api
+    newTag: latest
+  - name: frontend-image
+    newName: jym272/multinetwork-frontend
+    newTag: latest
+  - name: tasks-api-image
+    newName: jym272/multinetwork-tasks-api
+    newTag: latest
+  - name: users-api-image
+    newName: jym272/multinetwork-users-api
+    newTag: latest

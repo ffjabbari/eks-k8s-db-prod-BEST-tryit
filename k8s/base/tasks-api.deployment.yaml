@@ -25,8 +25,7 @@ spec:
             ]
       containers:
         - name: tasks-api
-          image: jym272/multinetwork-tasks-api:v1
-          imagePullPolicy: Always
+          image: tasks-api-image
           env:
             - name: POSTGRES_USER
               value: jorge

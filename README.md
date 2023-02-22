@@ -6,33 +6,26 @@ The endpoints are exposed through the host machine in localhost:
 - frontend: http://localhost:3000
 - adminer:  http://localhost:8080
 
-### Development
+### Development in Host
 For development purposes, a compose file `compose-only-db.yml` is used to start only
 the database and the adminer service. 
+```bash
+docker compose -f compose-only-db.yml up -d
+```
 
-Once the `db` has started the services `auth-api`, `frontend`, `tasks-api`
-and `users-api` will start in the host machine using `npm run dev` in each service.
+Once the `db` has started the services `auth-api`, `frontend`, `tasks-api`, `users-api` and
+`frontend` will start in the host machine using `npm run dev` in each respective folder.
+
 ## KUBERNETES
+
+There is two stages: **local** and **eks**. The `k8s` folder contains the kubernetes manifests
+structured in two folders: `base` and `overlay` following the `kustomize` [structure](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays).
+
 ### Local Deploy
-The `k8s` folder contains the kubernetes manifests to deploy the services in a local
-kubernetes cluster. The `k8s/pvc` folder contains the manifests to create the persistent
-volumes and persistent volume claims using a hostPath volume.
-
-If is necessary to update the container image name for the services, for example
-a new version of the image is pushed to docker hub, the name can be changed in
-one of the following files
-- auth-api.deployment.yaml
-- frontend.deployment.yaml
-- tasks-api.deployment.yaml
-- users-api.deployment.yaml
-
-
-
-
 #### Deploy k8s
 The deploy is realized using [kustomize](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/).
 ```bash
-kubectl apply -k ./k8s/overlays/local
+kubectl apply -k ./k8s/overlay/local
 ```
 #### Urls
 If `minikube` is used for the local cluster, the services will be exposed in the host machine.
@@ -43,23 +36,29 @@ bash urls.sh
 
 #### Delete resources
 ```bash
-kubectl delete -k ./k8s/overlays/local
+kubectl delete -k ./k8s/overlay/local
 ```
 ### Push script
 The `push.sh` script will build the images and push them to the docker hub in a name
-like `jym272/multinetwork-auth-api:latest`, make sure to configure docker hub credentials
-in the host machine and the repo names must be created in docker hub, change the 
-`docker_hub_repo_prefix_name` variable in the script.
+like `jym272/multinetwork-auth-api:latest` -> `myuser/multinetwork-service:latest`, 
+make sure to configure docker hub credentials in the host machine and the repo names must be 
+created in docker hub, change the `docker_hub_repo_prefix_name` variable in the script.
 
 ```bash
 # push script: change this variable to your docker hub repo prefix name
 declare docker_hub_repo_prefix_name="myuser/multinetwork"
 ```
+Also there is a `kustomization` available in the `k8s` folder to change the image name in all 
+manifests according to your docker hub repo image names. Change the values of **newName**
+and **newTag** in the files:
+- `k8s/overlay/eks/kustomization.yaml`
+- `k8s/overlay/local/kustomization.yaml`
+
 ```bash
 # Usage, it will build the images using docker-compose.yml and push them to 
 # docker hub
 
-# All services
+# All services will be built and pushed
 # it uses the tag:latest and the images is built with cache by default
 bash push.sh 
 # it uses a custom tag
@@ -80,7 +79,7 @@ bash push.sh --no-cache users-api
 
 
 ### Cloud Deploy using AWS EKS
-Read the README.md in `aws-kubectl` folder.
+Follow instructions of [README.md](./aws-kubectl/README.md) file in `aws-kubectl` folder.
 
 
 **### Local Deploy with Skaffold**
