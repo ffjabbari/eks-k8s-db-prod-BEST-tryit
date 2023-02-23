@@ -15,19 +15,25 @@ docker compose down
 The endpoints are exposed through the host machine in localhost:
 - frontend: http://localhost:3000
 - adminer:  http://localhost:8080
+  - Login -> System: PostgreSQL, Server: db, Username: jorge, Password: 123456
 
 ### Development in Host
 For development purposes, a compose file `compose-only-db.yml` is used to start only
-the database and the adminer service. 
+the database and the adminer service.
+
 ```bash
 # start the only-db service
 docker compose -f compose-only-db.yml up -d
 # delete the only-db service
 docker compose -f compose-only-db.yml down
 ```
-
-Once the `db` has started the services `auth-api`, `frontend`, `tasks-api`, `users-api` and
-`frontend` will start in the host machine using `npm run dev` in each respective folder.
+Create the corresponding `.env` file in each folder (see Readme.md) `auth-api`, `frontend`, 
+`tasks-api`, `users-api` and `frontend` and install dependencies.
+```bash
+npm i
+# once the dependencies are installed, .env file is created, and the only-db service is running
+npm run dev # can failed the first time due to concurrent processes
+``` 
 
 ## KUBERNETES
 
