@@ -46,7 +46,7 @@ else
             echo "EFS deleted"
             break
         fi
-        green_echo "Waiting for the EFS to be deleted"
+        green_echo "Waiting for the EFS to be deleted, retrying in $RETRY_INTERVAL_SEC second, attempt $failures of $MAX_FAILURES"
         sleep $RETRY_INTERVAL_SEC
         failures=$((failures+1))
     done
