@@ -1,0 +1,12 @@
+[submodule "users-api"]
+	path = users-api
+	url = https://github.com/jym272/multinetwork-users-api.git
+[submodule "tasks-api"]
+	path = tasks-api
+	url = https://github.com/jym272/multinetwork-tasks-api.git
+[submodule "auth-api"]
+	path = auth-api
+	url = https://github.com/jym272/multinetwork-auth-api.git
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/jym272/multinetwork-frontend.git
