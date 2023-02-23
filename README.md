@@ -1,4 +1,8 @@
 ## Microservices with Node.js, React, Docker, Kubernetes and AWS EKS
+Clone this project with the following command:
+```bash
+git clone --recurse-submodules https://github.com/jym272/multinetwork-k8s.git
+```
 ### Using Docker compose
 The images are build in the host machine using a local `Dockerfile` in each service
 trough a docker compose file orchestrator. `docker-compose.yml`
