@@ -74,8 +74,7 @@ and **newTag** in the files:
 - `k8s/overlay/local/kustomization.yaml`
 
 ```bash
-# Usage, it will build the images using docker-compose.yml and push them to 
-# docker hub
+# Usage, it will build the images using docker-compose.yml and push them to Docker hub
 
 # All services will be built and pushed
 # it uses the tag:latest and the images is built with cache by default
@@ -87,7 +86,7 @@ bash push.sh --no-cache
 # it uses a custom tag and build the images without cache, force rebuild
 bash push.sh --tag v2.0.0 --no-cache
 
-# Selected services
+# Selected services will be built and pushed
 # only frontend and auth-api
 bash push.sh frontend auth-api
 # only tasks-api with tag
