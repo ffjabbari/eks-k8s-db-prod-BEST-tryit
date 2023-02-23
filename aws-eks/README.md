@@ -1,4 +1,4 @@
-### Kubectl
+### Kubectl Container
 
 The [alpine/k8s](https://hub.docker.com/r/alpine/k8s) image is used for deploying kubernetes 
 resources, it includes `kubectl`, `eksctl` binaries and is designed to be used as a utility 
@@ -7,16 +7,12 @@ container for **AWS EKS**.
 For ease of use, the container is configured to use the AWS credentials of the host machine, a 
 _named volume_ is used to store `kubectl` config once the cluster has been deployed.
 ```bash
-cd aws-kubectl/
+cd aws-eks/
 
 # init the container on interactive mode
 docker compose run --rm kubectl
-
-#inside the container
-cd files/
 ```
-In `docker-compose.yml` a bind mount is used to copy the kubernetes files to the container, 
-`k8s` dir.
+In `docker-compose.yml` a bind mount is used to copy the kubernetes manifestos to the container.
 
 Note that an anonymous volume is also used to prevent copying the dir __k8s/overlay/local__, this 
 config use a **hostPath** volume and is only valid in a one node cluster like **minikube**.
@@ -26,12 +22,13 @@ The volume used in the AWS EKS cluster is an **EFS-CSI** [volume](https://docs.a
 ### Deploying a cluster
 
 - Some names vars like the name of the cluster is hardcoded into the scripts. Any change must 
-be replicated in both scripts. Also take into account that the default region used is 
-`region_code=sa-east-1`, change it 
-if necessary in the script `create.sh` and `delete_efs_and_cluster.sh`.
-In the same way set the default region with `aws configure`.
-- In the `create.sh` script, in `helm upgrade` section the image.repository must be be
- configured according to the region find your [correct value](https://docs.aws.amazon.com/eks/latest/userguide/add-ons-images.html) 
+be replicated in both scripts. 
+- Also take into account that the default region used is `region_code=sa-east-1`, change it if 
+  necessary in the scripts `create.sh` `delete_efs_and_cluster.sh` and in `cluster.yaml` file.
+- The **kubectl container** takes the aws credential from `~/.aws` using a bind mount, the 
+  default region must be set, otherwise set with `aws configure` inside the container.
+- In the `create.sh` script, in `helm upgrade` section the **image.repository** must be be
+ configured according to the region, find your [correct value](https://docs.aws.amazon.com/eks/latest/userguide/add-ons-images.html) 
 and change the part `602401143452.dkr.ecr.sa-east-1.amazonaws.com`
 
 Once the container is running in interactive mode, the cluster can be deployed using the following
@@ -89,7 +86,7 @@ Instead of accessing the container in interactive mode, the container can be use
 container executed in the host, for example, to get the status of the pods or services, the 
 following commands can be:
 ```bash
-# In the host in aws-kubectl/
+# In the host in aws-eks/
 ./kubectl get pods -o wide
 # or
 bash kubectl get svc

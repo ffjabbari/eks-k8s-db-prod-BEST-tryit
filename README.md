@@ -88,4 +88,4 @@ bash push.sh --no-cache users-api
 
 
 ### Cloud Deploy using AWS EKS
-Follow instructions of [README.md](./aws-kubectl/README.md) file in `aws-kubectl` folder.
+Follow instructions of [README.md](./aws-eks/README.md) file in `aws-kubectl` folder.
