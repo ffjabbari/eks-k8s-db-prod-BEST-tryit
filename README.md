@@ -1,7 +1,12 @@
 ### Using Docker compose
 The images are build in the host machine using a local `Dockerfile` in each service
 trough a docker compose file orchestrator. `docker-compose.yml`
-
+```bash
+# start the services
+docker compose up -d
+# delete the services
+docker compose down
+```
 The endpoints are exposed through the host machine in localhost:
 - frontend: http://localhost:3000
 - adminer:  http://localhost:8080
@@ -10,7 +15,10 @@ The endpoints are exposed through the host machine in localhost:
 For development purposes, a compose file `compose-only-db.yml` is used to start only
 the database and the adminer service. 
 ```bash
+# start the only-db service
 docker compose -f compose-only-db.yml up -d
+# delete the only-db service
+docker compose -f compose-only-db.yml down
 ```
 
 Once the `db` has started the services `auth-api`, `frontend`, `tasks-api`, `users-api` and
@@ -80,6 +88,3 @@ bash push.sh --no-cache users-api
 
 ### Cloud Deploy using AWS EKS
 Follow instructions of [README.md](./aws-kubectl/README.md) file in `aws-kubectl` folder.
-
-
-**### Local Deploy with Skaffold**
