@@ -67,7 +67,6 @@ done
 
 function push_service() {
   local service=$1
-  local docker_hub_repo_prefix_name=$2
   local docker_hub_repo_name="${docker_hub_repo_prefix_name}-${service}"
   local repository="$folder-$service:latest"
   if [[ $no_cache -eq 1 ]]; then
@@ -82,7 +81,7 @@ function push_service() {
 }
 available_services=${left_args:-${services[@]}}
 for service in $available_services; do
-  push_service "$service" "$docker_hub_repo_prefix_name"
+  push_service "$service"
 done
 
 
