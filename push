@@ -9,9 +9,9 @@ no_cache=0
 tag_name="latest"
 
 function print_usage() {
-  echo "Usage: $0 [--no-cache] [--tag <tag_name>]"
+  echo "Usage: $0 [--no-cache] [--tag <tag_name>] [service_name]"
   echo "  --no-cache: build the image without using the cache"
-  echo "  --tag: tag the image with the given tag name"
+  echo "  --tag: tag the image with the given tag_name"
 }
 
 function arg_is_a_service(){
@@ -24,12 +24,14 @@ function arg_is_a_service(){
   return 1
 }
 
+if ! TEMP=$(getopt -o "" --longoptions no-cache,tag: -n "$0" -- "$@");
+then
+    print_usage
+    exit 1
+fi
 
-
-TEMP=$(getopt -o "" --longoptions no-cache,tag: -n "$0" -- "$@")
-
-# Parse the options
 eval set -- "$TEMP"
+unset TEMP
 while true; do
   case "$1" in
     --no-cache ) # no-cache option
@@ -46,6 +48,7 @@ while true; do
         for arg in $left_args; do
           if ! arg_is_a_service "$arg"; then
             echo -e "\e[31m$0: In the args: ${*:2}. $arg is not a service. Invalid arguments\e[0m"
+            print_usage
             exit 1
           fi
         done
